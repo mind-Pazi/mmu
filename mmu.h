@@ -124,7 +124,7 @@ void MMU_exception(MMU *mmu, int pos)
     int page_number = pos / PAGE_SIZE;
     int empty_frame = -1;
 
-    // Step 1: Check for empty space in physical memory
+    // Check for empty space in physical memory
     for (int i = 0; i < NUM_FRAMES; ++i)
     {
         int is_frame_empty = 1;
@@ -145,7 +145,7 @@ void MMU_exception(MMU *mmu, int pos)
         }
     }
 
-    // Step 2: If no empty frame, use Second Chance algorithm
+    // If no empty frame, use Second Chance algorithm
     if (empty_frame == -1)
     {
         printf("Applying Second Chance algorithm.\n");
@@ -192,8 +192,8 @@ void MMU_exception(MMU *mmu, int pos)
         printf("Iterations taken: %d\n", iterations);
     }
 
-    // Step 3: Update page table and swap in/out as necessary
-    // If replacing an old page, write it back to the swap file
+    // Update page table and swap in/out as necessary
+    //  If replacing an old page, write it back to the swap file
     if (empty_frame != -1)
     {
         for (int j = 0; j < NUM_PAGES; ++j)
