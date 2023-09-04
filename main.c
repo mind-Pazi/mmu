@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include "mmu.h"
 #include <stdlib.h>
@@ -57,6 +56,7 @@ int main()
         }
     }
     printf("\n");
+    // 4. Boundary Conditions
     MMU_writeByte(mmu, 0, 'X');
     MMU_readByte(mmu, 0);
     MMU_writeByte(mmu, VIRTUAL_MEMORY_SIZE - 1, 'X');
