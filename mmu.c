@@ -122,46 +122,62 @@ void MMU_exception(MMU *mmu, int pos)
     {
         printf("Applying Second Chance algorithm.\n");
         int found = 0;
-        int iterations = 0;
-        while (!found)
+        int cycles = 0; // Count how many cycles we go through
+        
+        while (!found && cycles < 4)
         {
-            iterations++;
-            int oldest_page = -1;
-            for (int j = 0; j < NUM_PAGES; ++j)
+            cycles++;
+            for (int rw_combo = 0; rw_combo < 4; ++rw_combo)
             {
-                if (mmu->page_table[j].frame_number == mmu->oldest_frame_index)
+                int target_read_bit = (rw_combo & 2) >> 1;
+                int target_write_bit = rw_combo & 1;
+                
+                int oldest_page = -1;
+                for (int j = 0; j < NUM_PAGES; ++j)
                 {
-                    oldest_page = j;
+                    if (mmu->page_table[j].frame_number == mmu->oldest_frame_index)
+                    {
+                        oldest_page = j;
+                        break;
+                    }
+                }
+                
+                // Skip unswappable pages
+                if (mmu->page_table[oldest_page].unswappable)
+                {
+                    mmu->oldest_frame_index = (mmu->oldest_frame_index + 1) % NUM_FRAMES;
+                    printf("Skipped unswappable page: %d\n", oldest_page);
+                    continue;
+                }
+                
+                if (mmu->page_table[oldest_page].read_bit == target_read_bit &&
+                    mmu->page_table[oldest_page].write_bit == target_write_bit)
+                {
+                    // Replace this page
+                    printf("Found page to replace: %d\n", oldest_page);
+                    empty_frame = mmu->oldest_frame_index;
+                    found = 1;
                     break;
                 }
-            }
-
-            // Skip unswappable pages
-            if (mmu->page_table[oldest_page].unswappable)
-            {
+                else
+                {
+                    // Give a second chance and set the read and write bits to the lowest possible values
+                    mmu->page_table[oldest_page].read_bit = 0;
+                    mmu->page_table[oldest_page].write_bit = 0;
+                }
+                
+                // Move the pointer to the next frame
                 mmu->oldest_frame_index = (mmu->oldest_frame_index + 1) % NUM_FRAMES;
-                printf("Skipped unswappable page: %d\n", oldest_page);
-                continue;
             }
-
-            if (mmu->page_table[oldest_page].read_bit == 0 && mmu->page_table[oldest_page].write_bit == 0)
-            {
-                // Replace this page
-                printf("Found page to replace: %d\n", oldest_page);
-                empty_frame = mmu->oldest_frame_index;
-                found = 1;
-            }
-            else
-            {
-                // Give a second chance
-                mmu->page_table[oldest_page].read_bit = 0;
-                mmu->page_table[oldest_page].write_bit = 0;
-            }
-
-            // Move the pointer to the next frame
-            mmu->oldest_frame_index = (mmu->oldest_frame_index + 1) % NUM_FRAMES;
         }
-        printf("Iterations taken: %d\n", iterations);
+        
+        if (cycles >= 4)
+        {
+            printf("Could not find a page to replace after 4 cycles. Taking additional measures.\n");
+            // Handle this scenario appropriately
+        }
+        
+        printf("Iterations taken: %d\n", cycles * 4);
     }
 
     // Update page table and swap in/out as necessary
