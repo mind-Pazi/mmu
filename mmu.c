@@ -62,7 +62,7 @@ void MMU_writeByte(MMU *mmu, int pos, char c)
     else
     {
         printf("Page hit at position: %d\n", pos);
-        printf("Page number: %d\n\n", page_number);
+        printf("Page number: %d\n", page_number);
     }
 
     // Get frame number and write byte
@@ -79,7 +79,7 @@ char MMU_readByte(MMU *mmu, int pos)
     int page_number = pos / PAGE_SIZE;
     int offset = pos % PAGE_SIZE;
 
-    printf("Reading byte at position: %d\n", pos);
+    printf("Reading byte at position: %d\n\n", pos);
 
     // Check if the page is valid
     if (!mmu->page_table[page_number].valid)
