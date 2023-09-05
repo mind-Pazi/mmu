@@ -10,10 +10,10 @@
 // Page table entry structure
 typedef struct
 {
-    int valid;
-    int unswappable;
-    int read_bit;
-    int write_bit;
+    int valid:1;
+    int unswappable:1;
+    int read_bit:1;
+    int write_bit:1;
     int frame_number;
 } PageTableEntry;
 
@@ -24,6 +24,8 @@ typedef struct
     char *physical_memory;
     FILE *swap_file;
     int oldest_frame_index;
+    int free_frames[NUM_FRAMES]; // Freelist array
+    int free_frames_top;         // Index for the top of the freelist
 } MMU;
 
 // Function declarations
