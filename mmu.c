@@ -132,12 +132,18 @@ void MMU_exception(MMU *mmu, int pos)
                 }
             }
 
+            int conditions[][2] = {
+                {0, 0},  // condition: read_bit = 0, write_bit = 0
+                {1, 0},  // condition: read_bit = 1, write_bit = 0
+                {0, 1},  // condition: read_bit = 0, write_bit = 1
+                {1, 1}   // condition: read_bit = 1, write_bit = 1
+            };
             // Check read and write bits for each condition: 00, 10, 01, 11
-            for (int condition = 0; condition <= 3; ++condition)
+            for (int i = 0; i < 4; ++i)
             {
-                int read_bit = (condition & 2) >> 1;
-                int write_bit = condition & 1;
-
+                int read_bit = conditions[i][0];
+                int write_bit = conditions[i][1];
+            
                 // Skip unswappable pages or pages not matching the condition
                 if (mmu->page_table[oldest_page].unswappable ||
                     mmu->page_table[oldest_page].read_bit != read_bit ||
