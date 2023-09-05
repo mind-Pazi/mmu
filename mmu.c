@@ -62,7 +62,7 @@ void MMU_writeByte(MMU *mmu, int pos, char c)
     else
     {
         printf("Page hit at position: %d\n", pos);
-        printf("Page number: %d\n", page_number);
+        printf("Page number: %d\n\n", page_number);
     }
 
     // Get frame number and write byte
